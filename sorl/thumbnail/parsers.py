@@ -89,3 +89,15 @@ def parse_crop(crop, xy_image, xy_window):
     offset_y = get_offset(y_crop, xy_image[1] - xy_window[1])
     return offset_x, offset_y
 
+def parse_trim(trim, xy_image, xy_window):
+    """
+    Returns x, y offsets for cropping. The window area should fit inside
+    image but it works out anyway
+    """
+    xywh_trim = map(int, trim.split(' '))
+
+    if len(xywh_trim) != 4:
+        raise ThumbnailParseError('Unrecognized crop option: %s' % crop)
+
+    return xywh_trim
+

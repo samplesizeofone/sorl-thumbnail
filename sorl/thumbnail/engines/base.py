@@ -1,6 +1,6 @@
 #coding=utf-8
 from sorl.thumbnail.helpers import toint
-from sorl.thumbnail.parsers import parse_crop
+from sorl.thumbnail.parsers import parse_crop, parse_trim
 
 
 class EngineBase(object):
@@ -12,6 +12,7 @@ class EngineBase(object):
         Processing conductor, returns the thumbnail as an image engine instance
         """
         image = self.colorspace(image, geometry, options)
+        image = self.trim(image, geometry, options)
         image = self.scale(image, geometry, options)
         image = self.crop(image, geometry, options)
         return image
@@ -50,6 +51,26 @@ class EngineBase(object):
         x_offset, y_offset = parse_crop(crop, (x_image, y_image), geometry)
         return self._crop(image, geometry[0], geometry[1], x_offset, y_offset)
 
+    def trim(self, image, geometry, options):
+        """
+        Wrapper for ``_trim``
+        """
+        print options['trim']
+        trim = options['trim']
+
+        #if not trim or trim == 'noop':
+        #    return image
+        
+        x_image, y_image = self.get_image_size(image)
+
+        print 'about to parse'
+
+        x_offset, y_offset, width, height = parse_trim(trim, (x_image, y_image), geometry)
+
+        print 'parsed'
+
+        return self._crop(image, width, height, x_offset, y_offset)
+
     def write(self, image, options, thumbnail):
         """
         Wrapper for ``_write``
@@ -66,22 +87,6 @@ class EngineBase(object):
         x, y = self.get_image_size(image)
         return float(x) / y
 
-    def _get_dummy_image_data(self, width, height):
-        """
-        Returns useful data for subclass ``dummy_image`` method
-        """
-        w = min(width, height) / 2.0
-        x0 = toint(0.5 * (width - w))
-        y0 = toint(0.5 * (height - w))
-        x1 = toint(0.5 * (width + w))
-        y1 = toint(0.5 * (height + w))
-        return {
-            'canvas_color': (255, 255, 255),
-            'line_color': (200, 200, 200),
-            'lines': [(x0, y0, x1, y1), (x0, y1, x1, y0)],
-            'rectangle': (0, 0, width - 1, height -1),
-        }
-
     #
     # Methods which engines need to implement
     # The ``image`` argument refers to a backend image object
@@ -95,14 +100,6 @@ class EngineBase(object):
     def get_image_size(self, image):
         """
         Returns the image width and height as a tuple
-        """
-        raise NotImplemented()
-
-    def dummy_image(self, width, hieght):
-        """
-        Returns a generated dummy image object with size given. The dummy image
-        from the shipped engines are grey (240) and has a darker cross (128)
-        over them.
         """
         raise NotImplemented()
 
@@ -136,7 +133,8 @@ class EngineBase(object):
 
     def _get_raw_data(self, image, format_, quality):
         """
-        Gets raw data given the image, format and quality
+        Gets raw data given the image, format and quality. This method is
+        called from :meth:`write`
         """
         raise NotImplemented()
 
