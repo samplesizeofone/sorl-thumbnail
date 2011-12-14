@@ -55,7 +55,6 @@ class EngineBase(object):
         """
         Wrapper for ``_trim``
         """
-        print options['trim']
         trim = options['trim']
 
         #if not trim or trim == 'noop':
@@ -63,11 +62,7 @@ class EngineBase(object):
         
         x_image, y_image = self.get_image_size(image)
 
-        print 'about to parse'
-
         x_offset, y_offset, width, height = parse_trim(trim, (x_image, y_image), geometry)
-
-        print 'parsed'
 
         return self._crop(image, width, height, x_offset, y_offset)
 
