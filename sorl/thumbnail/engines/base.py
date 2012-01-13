@@ -55,10 +55,10 @@ class EngineBase(object):
         """
         Wrapper for ``_trim``
         """
-        trim = options['trim']
+        trim = options.get('trim', None)
 
-        #if not trim or trim == 'noop':
-        #    return image
+        if not trim or trim == 'noop':
+            return image
         
         x_image, y_image = self.get_image_size(image)
 
